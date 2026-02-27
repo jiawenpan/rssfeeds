@@ -1,0 +1,51 @@
+name: Update RSS Feeds
+
+on:
+  # Pointer publishes Monday and Thursday — run shortly after to catch new issues.
+  # Add or adjust cron entries here when new scrapers with different cadences are added.
+  schedule:
+    - cron: "0 11 * * 1"   # Monday 11:00 UTC
+    - cron: "0 11 * * 4"   # Thursday 11:00 UTC
+  # Allow manual runs from the Actions tab (useful for first-time setup and debugging)
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to commit updated feed files back to the repo
+
+jobs:
+  update-feeds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate RSS feeds
+        env:
+          # Replace with your actual GitHub Pages base URL after enabling Pages.
+          # Example: https://yourusername.github.io/rssfeeds
+          GITHUB_PAGES_BASE: ${{ vars.GITHUB_PAGES_BASE }}
+        run: python generate_feeds.py
+
+      - name: Commit and push updated feeds
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add feeds/ index.html
+          # Only commit if there are actual changes
+          if git diff --staged --quiet; then
+            echo "No feed changes — nothing to commit."
+          else
+            git commit -m "chore: update RSS feeds [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+            git push
+          fi
