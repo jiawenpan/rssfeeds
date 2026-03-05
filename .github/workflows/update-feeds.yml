@@ -4,8 +4,8 @@ on:
   # Pointer publishes Monday and Thursday — run shortly after to catch new issues.
   # Add or adjust cron entries here when new scrapers with different cadences are added.
   schedule:
-    - cron: "0 11 * * 1"   # Monday 11:00 UTC
-    - cron: "0 11 * * 4"   # Thursday 11:00 UTC
+    - cron: "0 20 * * 2"   # Tuesday 11:00 UTC
+    - cron: "0 20 * * 5"   # Friday 11:00 UTC
   # Allow manual runs from the Actions tab (useful for first-time setup and debugging)
   workflow_dispatch:
 
